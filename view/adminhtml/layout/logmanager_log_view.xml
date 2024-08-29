@@ -1,0 +1,11 @@
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="https://cdn.datatables.net/2.1.4/css/dataTables.dataTables.css"  src_type="url" rel="stylesheet" type="text/css"  />
+    </head>
+    <body>
+        <referenceBlock name="content">
+            <block class="ProDevTools\LogManager\Block\Adminhtml\View\BackButton" name="log_manager_back_button"/>
+            <block class="ProDevTools\LogManager\Block\Adminhtml\View" name="log_view_block" template="ProDevTools_LogManager::view.phtml"/>
+        </referenceBlock>
+    </body>
+</page>

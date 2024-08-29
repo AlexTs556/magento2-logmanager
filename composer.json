@@ -1,0 +1,25 @@
+{
+    "name": "prodevtools/magento2-logmanager",
+    "description": "A Magento 2 module for viewing logs in the admin panel.",
+    "type": "magento2-module",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alexander Tsyrulnikau",
+            "email": "im.alex.ts.86@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=8.1",
+        "magento/framework": "*"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "ProDevTools\\LogManager\\": ""
+        }
+    }
+}

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Menu/etc/menu.xsd">
+    <menu>
+        <add id="ProDevTools_LogManager::logmanager"
+             title="Log Manager"
+             translate="title"
+             module="ProDevTools_LogManager"
+             sortOrder="100"
+             parent="Magento_Backend::system"
+             resource="ProDevTools_LogManager::logmanager"
+        />
+
+        <add id="ProDevTools_LogManager::logmanager_grid"
+             title="Log Manager Grid"
+             translate="title"
+             module="ProDevTools_LogManager"
+             sortOrder="25"
+             parent="ProDevTools_LogManager::logmanager"
+             action="logmanager/log/"
+             resource="ProDevTools_LogManager::logmanager"
+        />
+    </menu>
+</config>

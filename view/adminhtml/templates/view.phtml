@@ -1,0 +1,30 @@
+<?php
+
+declare(strict_types=1);
+
+use ProDevTools\LogManager\Block\Adminhtml\View;
+
+/** @var $block View */
+
+?>
+<div id="log-table-container">
+    <!-- ko scope: 'log-table' -->
+        <!-- ko template: getTemplate() --><!-- /ko-->
+    <!-- /ko-->
+</div>
+
+<script type="text/x-magento-init">
+{
+    "*": {
+        "Magento_Ui/js/core/app": {
+            "components": {
+                "log-table": {
+                    "component": "ProDevTools_LogManager/js/log-table",
+                    "ajaxUrl": "<?= /* @noEscape */ $block->getAjaxUrl() ?>",
+                    "redirectUrl": "<?= /* @noEscape */ $block->getRedirectUrl() ?>"
+                }
+            }
+        }
+    }
+}
+</script>
