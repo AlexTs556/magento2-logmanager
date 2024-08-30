@@ -12,6 +12,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider as UiComponentDataProvider;
 use Magento\Framework\Filesystem\Glob;
+use Magento\Framework\App\Filesystem\DirectoryList as FilesystemDirectoryList;
 
 class DataProvider extends UiComponentDataProvider
 {
@@ -62,7 +63,7 @@ class DataProvider extends UiComponentDataProvider
     public function getData(): array
     {
         try {
-            $logPath = $this->directoryList->getPath(\Magento\Framework\App\Filesystem\DirectoryList::LOG);
+            $logPath = $this->directoryList->getPath(FilesystemDirectoryList::LOG);
             $logFiles = $this->filesystemGlob->glob($logPath . '/*.log');
 
             $i = 1;

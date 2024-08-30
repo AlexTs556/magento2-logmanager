@@ -5,24 +5,10 @@ declare(strict_types=1);
 namespace ProDevTools\LogManager\Block\Adminhtml;
 
 use Magento\Backend\Block\Template;
-use Magento\Backend\Block\Template\Context;
-use ProDevTools\LogManager\Model\LogService;
 
 class View extends Template
 {
-    /**
-     * @param LogService $logService
-     * @param Context $context
-     * @param array $data
-     */
-    public function __construct(
-        LogService $logService,
-        Context $context,
-        array $data = []
-    ) {
-        $this->logService = $logService;
-        parent::__construct($context, $data);
-    }
+    public const ROUTE_PATH = 'logmanager/log/';
 
     /**
      * Get the URL for the AJAX data request.
@@ -32,7 +18,7 @@ class View extends Template
     public function getAjaxUrl(): string
     {
         return $this->getUrl(
-            'logmanager/log/data',
+            self::ROUTE_PATH. 'data',
             [
                 'filename' => $this->getRequest()->getParam('filename')
             ]
@@ -46,6 +32,6 @@ class View extends Template
      */
     public function getRedirectUrl(): string
     {
-        return $this->getUrl('logmanager/log/');
+        return $this->getUrl(self::ROUTE_PATH);
     }
 }

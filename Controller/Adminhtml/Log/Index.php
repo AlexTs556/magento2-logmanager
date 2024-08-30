@@ -31,7 +31,7 @@ class Index extends Log implements HttpGetActionInterface
     public function execute(): Page
     {
         $resultPage = $this->resultPageFactory->create();
-        //$this->initPage($resultPage)->getConfig()->getTitle()->prepend(__('Log Manager'));
+        $this->initPage($resultPage)->getConfig()->getTitle()->prepend(__('Log Manager'));
         return $resultPage;
     }
 }

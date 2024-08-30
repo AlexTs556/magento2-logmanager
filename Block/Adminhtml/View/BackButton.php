@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ProDevTools\LogManager\Block\Adminhtml\View;
 
 use Magento\Backend\Block\Widget\Container;
+use ProDevTools\LogManager\Block\Adminhtml\View;
 
 class BackButton extends Container
 {
@@ -34,6 +35,6 @@ class BackButton extends Container
      */
     protected function getBackUrl(): string
     {
-        return $this->getUrl('logmanager/log/');
+        return $this->getUrl(View::ROUTE_PATH);
     }
 }
