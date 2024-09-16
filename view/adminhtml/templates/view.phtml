@@ -21,7 +21,8 @@ use ProDevTools\LogManager\Block\Adminhtml\View;
                 "log-table": {
                     "component": "ProDevTools_LogManager/js/log-table",
                     "ajaxUrl": "<?= /* @noEscape */ $block->getAjaxUrl() ?>",
-                    "redirectUrl": "<?= /* @noEscape */ $block->getRedirectUrl() ?>"
+                    "redirectUrl": "<?= /* @noEscape */ $block->getRedirectUrl() ?>",
+                    "columns": <?= /* @noEscape */ json_encode($block->getColumns()) ?>
                 }
             }
         }

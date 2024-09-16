@@ -12,7 +12,8 @@
     ],
     "require": {
         "php": ">=8.1",
-        "magento/framework": "*"
+        "magento/framework": "*",
+        "prodevtools/magento2-base": "^1.0"
     },
     "autoload": {
         "files": [
@@ -22,5 +23,5 @@
             "ProDevTools\\LogManager\\": ""
         }
     },
-    "version": "1.0.2"
+    "version": "1.0.3"
 }

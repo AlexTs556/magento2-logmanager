@@ -10,7 +10,8 @@ define([
         defaults: {
             template: 'ProDevTools_LogManager/log-table-template',
             ajaxUrl: '',
-            redirectUrl: ''
+            redirectUrl: '',
+            columns: []
         },
 
         initialize: function () {
@@ -22,6 +23,7 @@ define([
         initTable: function () {
             const ajaxUrl = this.ajaxUrl;
             const redirectUrl = this.redirectUrl;
+            const columns = this.getColumns();
 
             async.async('#logTable', function (logTableElement) {
                 if (!$.fn.DataTable.isDataTable(logTableElement)) {
@@ -39,15 +41,17 @@ define([
                                 return json.data;
                             }
                         },
-                        "columns": [
-                            { "data": "datetime" },
-                            { "data": "channel" },
-                            { "data": "level" },
-                            { "data": "message" },
-                            { "data": "context" }
-                        ]
+                        "columns": columns
                     });
                 }
+            });
+        },
+
+        getColumns: function () {
+            const columns = this.columns;
+
+            return columns.map(function (column) {
+                return { "data": column };
             });
         }
     });
