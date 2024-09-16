@@ -9,16 +9,22 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\App\Filesystem\DirectoryList as FilesystemDirectoryList;
 use Magento\Framework\Filesystem\Driver\File;
+use ProDevTools\LogManager\Model\LogFile\LogFileInterface;
+use ProDevTools\LogManager\Model\LogFile\LogFile;
 
 class LogService
 {
     /**
      * @param DirectoryList $directoryList
+     * @param LogFile $defaultLogFileModel
      * @param File $file
+     * @param array $logFiles
      */
     public function __construct(
         private readonly DirectoryList $directoryList,
-        private readonly File $file
+        private readonly LogFile $defaultLogFileModel,
+        private readonly File $file,
+        private readonly array $logFiles
     ) {
     }
 
@@ -45,19 +51,33 @@ class LogService
         string $orderDir = 'asc',
         int $draw = 1
     ): array {
+        // Find the log file interface and its parser
+        $logFile = $this->getLogFileFor(basename($filename));
+        if (!$logFile) {
+            return $this->getEmptyGrid();
+        }
+
+        $parser = $logFile->getParser($filename);
+        if (!$parser) {
+            return $this->getEmptyGrid('Parser not found.');
+        }
+
         // Resolve the full file path for the log file
         $filePath = $this->getFilePath($filename);
 
-        // Parse the entire log file into an array of logs
-        $logs = $this->parseLogs($filePath);
+        // Read the content of the log file
+        $fileContent = $this->readFileContent($filePath);
+
+        // Parse the file using the parser and the provided columns
+        $logs = $parser->parse($fileContent, $logFile->getGridColumns());
 
         // Filter logs by search term, if provided
         if ($search) {
-            $logs = $this->filterLogs($logs, $search);
+            $logs = $this->filterLogs($logs, $search, $logFile->getGridColumns());
         }
 
         // Sort the logs based on the provided column and direction
-        $logs = $this->sortLogs($logs, $orderColumn, $orderDir);
+        $logs = $this->sortLogs($logs, $orderColumn, $orderDir, $logFile->getGridColumns());
 
         // Calculate total logs before slicing for pagination
         $totalLogs = count($logs);
@@ -74,6 +94,29 @@ class LogService
     }
 
     /**
+     * Finds the appropriate LogFileInterface based on the log file name.
+     *
+     * @param string $filename
+     * @return LogFileInterface|null
+     */
+    public function getLogFileFor(string $filename): ?LogFileInterface
+    {
+        $logFileModel = null;
+        foreach ($this->logFiles as $logFile) {
+            if (in_array($filename, $logFile->getFiles(), true)) {
+                $logFileModel = $logFile;
+                break;
+            }
+        }
+
+        if (!$logFileModel) {
+            $logFileModel = $this->defaultLogFileModel;
+        }
+
+        return $logFileModel;
+    }
+
+    /**
      * Resolves the full file path for a given log file name.
      *
      * @param string $fileName
@@ -83,10 +126,8 @@ class LogService
      */
     private function getFilePath(string $fileName): string
     {
-        // Get the directory path for the log files
-        $filePath = $this->directoryList->getPath(FilesystemDirectoryList::LOG) . '/' . $fileName;
+        $filePath = $this->directoryList->getPath(FilesystemDirectoryList::VAR_DIR) . '/' . $fileName;
 
-        // Check if the file exists, if not throw an exception
         if (!file_exists($filePath)) {
             throw new LocalizedException(
                 __('The "%1" file doesn\'t exist. Verify the file and try again.', [$filePath])
@@ -97,91 +138,20 @@ class LogService
     }
 
     /**
-     * Parses the log file into an array of log entries.
+     * Reads the content of the specified file.
      *
      * @param string $filePath
-     * @return array
+     * @return string
      * @throws FileSystemException
      */
-    private function parseLogs(string $filePath): array
+    private function readFileContent(string $filePath): string
     {
-        $logs = [];
-        $currentLog = null;
-
-        // Open the log file for reading
-        $handle = $this->file->fileOpen($filePath, 'r');
-        if (!$handle) {
-            throw new FileSystemException(__('Unable to open the file: %1', [$filePath]));
+        $content = $this->file->fileGetContents($filePath);
+        if ($content === false) {
+            throw new FileSystemException(__('Unable to read the file: %1', [$filePath]));
         }
 
-        // Read the file line by line
-        while (($line = fgets($handle)) !== false) {
-            // Check if the line is a new log entry
-            if (preg_match('/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+\+\d{2}:\d{2}\]/', $line)) {
-                // If there is a current log entry, add it to the logs array
-                if ($currentLog) {
-                    $logs[] = $currentLog;
-                }
-                // Parse the new log entry line
-                $currentLog = $this->parseLogLine($line);
-            } else {
-                // Append context to the current log entry
-                if ($currentLog) {
-                    $currentLog['context'] .= "\n" . trim($line);
-                }
-            }
-        }
-
-        // Add the last log entry if it exists
-        if ($currentLog) {
-            $logs[] = $currentLog;
-        }
-
-        $this->file->fileClose($handle);
-
-        return $logs;
-    }
-
-    /**
-     * Parses a single log line into a structured array.
-     *
-     * @param string $line
-     * @return array|null
-     */
-    private function parseLogLine(string $line): ?array
-    {
-        // Regular expression to parse the log line
-        $pattern = '/^\[(?P<datetime>[^\]]+)\] (?P<channel>[^.]+)\.(?P<level>[A-Z]+): (?P<message>.*?)( \[\])?$/';
-
-        // Match the line against the pattern
-        if (preg_match($pattern, $line, $matches)) {
-            return [
-                'datetime' => $matches['datetime'],
-                'channel' => $matches['channel'],
-                'level' => $matches['level'],
-                'message' => $matches['message'],
-                'context' => ''
-            ];
-        }
-
-        return null;
-    }
-
-    /**
-     * Filters logs based on the provided search string.
-     *
-     * @param array $logs
-     * @param string $search
-     * @return array
-     */
-    private function filterLogs(array $logs, string $search): array
-    {
-        return array_filter($logs, function ($log) use ($search) {
-            return stripos($log['message'], $search) !== false ||
-                stripos($log['level'], $search) !== false ||
-                stripos($log['channel'], $search) !== false ||
-                stripos($log['context'], $search) !== false;
-        });
+        return $content;
     }
 
     /**
@@ -190,17 +160,54 @@ class LogService
      * @param array $logs
      * @param int $orderColumn
      * @param string $orderDir
+     * @param array $columns
      * @return array
      */
-    private function sortLogs(array $logs, int $orderColumn, string $orderDir): array
+    private function sortLogs(array $logs, int $orderColumn, string $orderDir, array $columns): array
     {
-        $columns = ['datetime', 'channel', 'level', 'message', 'context'];
         usort($logs, function ($a, $b) use ($orderColumn, $orderDir, $columns) {
             $column = $columns[$orderColumn];
             return $orderDir === 'asc' ? strcmp($a[$column], $b[$column]) : strcmp($b[$column], $a[$column]);
         });
 
         return $logs;
+    }
+
+    /**
+     * Filters logs based on the provided search string.
+     *
+     * @param array $logs
+     * @param string $search
+     * @param array $columns
+     * @return array
+     */
+    private function filterLogs(array $logs, string $search, array $columns): array
+    {
+        return array_filter($logs, function ($log) use ($search, $columns) {
+            foreach ($columns as $column) {
+                if (stripos($log[$column], $search) !== false) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    /**
+     * Returns an empty grid structure.
+     *
+     * @param string|null $message
+     * @return array
+     */
+    private function getEmptyGrid(string $message = null): array
+    {
+        return [
+            'draw' => 1,
+            'recordsTotal' => 0,
+            'recordsFiltered' => 0,
+            'data' => [],
+            'message' => $message ?? 'No log data available.',
+        ];
     }
 
     /**

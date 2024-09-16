@@ -7,7 +7,7 @@
              translate="title"
              module="ProDevTools_LogManager"
              sortOrder="100"
-             parent="Magento_Backend::system"
+             parent="ProDevTools_Base::prodevtools"
              resource="ProDevTools_LogManager::logmanager"
         />
 

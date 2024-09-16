@@ -20,7 +20,7 @@ class Delete extends Log implements HttpPostActionInterface
      */
     public function __construct(
         private readonly LogService $logService,
-        Context $context
+        Context                      $context
     ) {
         parent::__construct($context);
     }

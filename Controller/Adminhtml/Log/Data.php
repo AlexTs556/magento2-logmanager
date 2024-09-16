@@ -22,10 +22,10 @@ class Data extends Log implements HttpGetActionInterface
      * @param Context $context
      */
     public function __construct(
-        private readonly JsonFactory $resultJsonFactory,
-        private readonly LogService $logService,
+        private readonly JsonFactory     $resultJsonFactory,
+        private readonly LogService      $logService,
         private readonly LoggerInterface $logger,
-        Context $context
+        Context                          $context
     ) {
         parent::__construct($context);
     }

@@ -30,9 +30,8 @@ The **LogManager** module for Magento 2 provides an easy way to view and manage 
 3. Enable the module
 
     ```bash
-    php bin/magento module:enable ProDevTools_LogManager
     php bin/magento setup:upgrade
-    php bin/magento cache:clean
+    php bin/magento setup:di:compile
     ```
 
 ### 2. Install via Composer
@@ -46,9 +45,8 @@ The **LogManager** module for Magento 2 provides an easy way to view and manage 
 2. Enable the module:
 
     ```bash
-    php bin/magento module:enable ProDevTools_LogManager
     php bin/magento setup:upgrade
-    php bin/magento cache:clean
+    php bin/magento setup:di:compile
     ```
 
 ## Usage
